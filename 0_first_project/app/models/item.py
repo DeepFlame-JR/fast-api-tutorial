@@ -5,5 +5,7 @@ class Item(BaseModel):
     description: str | None = Field(
         default=None,  title="The description of the item", max_length=300
     )
-    price: Field(gt=0, description="The price must be greater than zero")
+    price: float = Field(gt=0, description="The price must be greater than zero")
     tax: float | None = None
+    tags: list[str] = []
+    sets: set[str] = set()

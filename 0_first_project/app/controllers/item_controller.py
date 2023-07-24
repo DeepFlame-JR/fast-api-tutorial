@@ -8,7 +8,7 @@ from ..models.user import User
 router = APIRouter()
 
 @router.post("/")
-async def create_item(item: Item):
+async def create_item(item: Item) -> Item:
     item_dict = item.dict()
     if item.tax:
         price_with_tax = item.price + item.tax
@@ -32,8 +32,8 @@ async def read_items(q: Annotated[str | None, Query( # 주석
     return results
 
 # Integer Validation
-@router.get("/{item_id}")
-async def read_items(
+@router.get("/{item_id}", response_model=Item)
+async def read_item(
     *,  # 원래는 기본값이 없는 매개변수를 앞에 둬야하나, *를 통해서 그 순서를 상관하지 않아도 됨
     item_id: Annotated[int, Path(title="The ID of the item to get", ge=0, le=1000)] , # Path 매개변수 (0 <= item_id <= 1000)
     q: str,
@@ -64,7 +64,25 @@ async def read_items(
 async def update_item(
     *,
     item_id: int,
-    item: Item,
+    item: Annotated[Item, Body(
+        examples=[
+            {
+                "name": "Foo",
+                "description": "A very nice Item",
+                "price": 35.4,
+                "tax": 3.2,
+            },
+            {
+                "name": "Bar",
+                "price": "35.4",
+            },
+            {
+                "name": "Baz",
+                "price": "thirty five point four",
+            },
+        ]        
+    )
+    ],
     user: User,
     importance: Annotated[int, Body(gt=0)],
     q: str | None = None,
